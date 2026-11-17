@@ -1,0 +1,14 @@
+{
+  "name": "genorda-express-quote",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Browser-local express freight estimator with configurable rates, by GENORDA.",
+  "license": "MIT",
+  "homepage": "https://www.genorda-logistics.hk/",
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "start": "node scripts/server.mjs",
+    "test": "node --test",
+    "build": "node scripts/build.mjs"
+  }
+}

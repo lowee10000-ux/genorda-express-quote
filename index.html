@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="GENORDA 开源国际快递费用估算工具。支持目的地分区、IP/IE/IPE、附加费计算、复制及打印；公开版本使用合成演示价表，支持本地导入自有运价。">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; connect-src 'none'; img-src 'self' data:; font-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+  <title>国际快递智能报价 · GENORDA 开源工具</title>
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+  <link rel="stylesheet" href="assets/app.css">
+  <script src="assets/core.js" defer></script>
+  <script src="data/demo-rates.js" defer></script>
+  <script src="assets/app.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#quoteForm">跳到费用试算</a>
+  <header class="hero">
+    <nav class="topbar" aria-label="品牌与官网">
+      <a class="brand" href="https://www.genorda-logistics.hk/" target="_blank" rel="noopener noreferrer"><img src="assets/favicon.svg" width="38" height="38" alt=""><span>GENORDA<span class="brand-sub">国际物流 · 开源工具</span></span></a>
+      <a class="website" href="https://www.genorda-logistics.hk/" target="_blank" rel="noopener noreferrer">访问公司官网 <span aria-hidden="true">↗</span></a>
+    </nav>
+    <div class="hero-copy">
+      <div><p class="eyebrow">EXPRESS FREIGHT ESTIMATOR</p><h1>国际快递智能报价</h1><p class="lead">先核对目的地与计费重量，再把费用算清楚。</p></div>
+      <button class="settings-button" id="openSettings" type="button" aria-haspopup="dialog">本地参数与价表 <span aria-hidden="true">⚙</span></button>
+    </div>
+    <div class="feature-list"><span>IP / IE / IPE 费用试算</span><span>复制与打印估算单</span><span>本地计算 · 无需账号</span></div>
+  </header>
+
+  <main class="main">
+    <div id="dataStatus" class="data-status" role="status"><b>演示模式</b><span>使用合成金额，仅供功能演示，不可用于实际报价。</span></div>
+    <div class="workspace">
+      <section class="card input-panel" aria-labelledby="inputTitle">
+        <div class="section-heading"><h2 id="inputTitle"><span class="step">01</span> 填写询价信息</h2><button class="text-button" id="loadExample" type="button">填入示例</button></div>
+        <form id="quoteForm" novalidate>
+          <div class="field"><label for="dest">目的地国家 / 地区 / 州</label><input id="dest" name="dest" list="destList" autocomplete="off" placeholder="输入后从列表精确选定目的地" required aria-describedby="destinationHelp"><datalist id="destList"></datalist><p class="field-help" id="destinationHelp">支持中文或英文；部分国家需要按州或地区选择。</p></div>
+          <p class="zone-display">当前价表分区 <output id="zoneView">—</output></p><p class="destination-note" id="destinationNote" hidden></p>
+          <fieldset class="field service-field"><legend>服务类型 <span class="optional">按当前价表匹配</span></legend><div class="service-options">
+            <label class="service"><input type="radio" name="service" value="IP" checked><span><b>IP</b><small>国际优先</small></span></label>
+            <label class="service"><input type="radio" name="service" value="IE"><span><b>IE</b><small>国际经济</small></span></label>
+            <label class="service"><input type="radio" name="service" value="IPE"><span><b>IPE</b><small>服务代码 IPE</small></span></label>
+          </div></fieldset>
+          <div class="row-two"><div class="field"><label for="pack">包装类型</label><select id="pack" name="pack"><option value="Package">Package 包裹</option><option value="Pak">Pak 快递袋</option><option value="Envelope">Envelope 文件封</option></select></div><div class="field"><label for="weight">计费重量 <span class="optional">kg</span></label><input id="weight" name="weight" type="number" min="0.001" max="1000000" step="any" inputmode="decimal" placeholder="例如 1.5" required></div></div>
+          <p class="field-help weight-help" id="weightHelp">请填实际重与体积重核对后的计费重量。本工具不自动计算体积重。</p>
+          <label class="dg-option"><input id="dg" name="dg" type="checkbox"><span><b>危险品（DG）费用试算</b><small>添加配置的操作费；货物与渠道仍须逐票评估。</small></span></label>
+          <p class="dg-note" id="dgNote" hidden>勾选不代表承运接受。分类、包装、数量、路线、文件及承运人当期条件均需逐票核对。</p>
+          <button class="calculate" type="submit">生成费用估算 <span aria-hidden="true">→</span></button>
+          <p class="form-footnote">不自动判断危险品分类、EQ 适用性或出口许可。</p>
+        </form>
+      </section>
+      <section class="card quote-panel" aria-labelledby="resultTitle"><div class="section-heading"><h2 id="resultTitle"><span class="step">02</span> 费用估算单</h2><span class="local-label">浏览器内生成</span></div><div id="result" aria-live="polite"><div class="empty-state"><span class="empty-icon" aria-hidden="true">¥</span><h3>每一项费用，都清楚列出</h3><p>填写左侧信息，生成运费、附加费与合计。<br>可复制发送，也可打印保存为 PDF。</p><button class="text-button" id="emptyExample" type="button">先试一组示例 →</button></div></div></section>
+    </div>
+    <details class="usage"><summary>使用边界与计费说明</summary><div class="usage-body"><p id="rulesSummary"></p><p>燃油基数为运费与配置的危险品操作费之和；内地至香港衔接费按计费重计算并适用配置的最低收费；加价率按比例计入各行，各行四舍五入到分后相加。免燃油分区仅按导入价表的明确配置使用。</p><p>本工具不接入承运人实时报价或接受系统，不含关税、目的地税费、偏远地区、高风险、超尺寸及其他未配置收费。服务代码、分区与金额均不构成服务可用、时效或承运保证。</p><p>所有安排按本票货物、包装、数量、路线和承运人当期条件逐票评估；使用服务名称或引用规则不代表 GENORDA 获得承运人认证、授权或保证结果。</p></div></details>
+    <div class="assessment"><div><h2>费用算完，下一步核对货物与渠道</h2><p>了解 GENORDA 的香港操作枢纽服务与货物评估方式。</p></div><a href="https://www.genorda-logistics.hk/shipment-assessment/" target="_blank" rel="noopener noreferrer">到官网提交货物信息 <span aria-hidden="true">↗</span></a></div>
+  </main>
+  <footer class="footer"><p><a href="https://www.genorda-logistics.hk/" target="_blank" rel="noopener noreferrer">GENORDA 国际物流 · 官方网站</a></p><p>Genorda International Logistics (Hong Kong) Co., Limited</p><p>开源代码采用 MIT 许可 · 演示金额不代表 GENORDA 或承运人的实际报价</p></footer>
+
+  <dialog id="settingsDialog" aria-labelledby="settingsTitle"><form id="settingsForm" novalidate><div class="dialog-head"><div><p class="eyebrow">LOCAL SETTINGS</p><h2 id="settingsTitle">本地参数与价表</h2></div><button class="icon-button" id="closeSettings" type="button" aria-label="关闭设置">×</button></div><div class="dialog-body">
+    <p class="settings-note">参数只存于当前浏览器。前端工具没有内部权限隔离，价表和加价设置无法向使用者保密。</p>
+    <section class="rate-import" aria-labelledby="rateTitle"><h3 id="rateTitle">当前价表</h3><p id="rateInfo"></p><label class="file-label" for="rateFile">导入本地价表 JSON</label><input id="rateFile" type="file" accept=".json,application/json"><p class="field-help">仅在当前页面内存使用，不上传文件，也不持久保存价表。刷新后恢复演示模式。</p><p id="importStatus" role="status"></p><button class="text-button" id="restoreDemo" type="button">恢复演示价表</button></section>
+    <div class="field"><label for="sCompany">估算单抬头</label><input id="sCompany" name="company" maxlength="120" required></div>
+    <div class="row-two"><div class="field"><label for="sFuel">燃油附加费率 %</label><input id="sFuel" name="fuel" type="number" min="0" max="1000" step="any" required></div><div class="field"><label for="sDG">危险品操作费 元 / 票</label><input id="sDG" name="dg" type="number" min="0" max="10000000" step="any" required></div></div>
+    <div class="row-two"><div class="field"><label for="sCross">衔接费 元 / kg</label><input id="sCross" name="cross" type="number" min="0" max="10000000" step="any" required></div><div class="field"><label for="sCrossMin">衔接费最低收费 元</label><input id="sCrossMin" name="crossMin" type="number" min="0" max="10000000" step="any" required></div></div>
+    <div class="row-two"><div class="field"><label for="sMargin">各行加价率 %</label><input id="sMargin" name="margin" type="number" min="0" max="1000" step="any" required></div><div class="field"><label for="sDays">估算参考期限 天</label><input id="sDays" name="days" type="number" min="1" max="365" step="1" required></div></div>
+    <p id="settingsError" class="error-message" role="alert" hidden></p><button class="save-button" type="submit">保存本地参数</button><button class="text-button reset-button" id="resetSettings" type="button">恢复示例参数</button>
+  </div></form></dialog>
+  <dialog id="copyDialog" aria-labelledby="copyTitle"><div class="dialog-head"><h2 id="copyTitle">手动复制估算单</h2><button class="icon-button" id="closeCopy" type="button" aria-label="关闭复制窗口">×</button></div><div class="dialog-body"><p>浏览器未允许剪贴板写入。请选中下方文字后复制。</p><label class="sr-only" for="copyText">估算单全文</label><textarea id="copyText" readonly rows="16"></textarea></div></dialog>
+  <div class="toast" id="toast" role="status"></div>
+  <noscript><p class="noscript">此费用估算工具需要 JavaScript。你也可以直接访问 <a href="https://www.genorda-logistics.hk/">GENORDA 官网</a>。</p></noscript>
+</body>
+</html>
